@@ -1,0 +1,125 @@
+/* =============================================================
+   HugoMed - muonekano wa pamoja kwa skrini zote
+   ============================================================= */
+
+:root {
+  --teal: #0F766E;
+  --teal-dark: #115E59;
+  --teal-soft: #E6F2F1;
+  --ink: #0F172A;
+  --ink-2: #334155;
+  --muted: #475569;
+  --line: #E2E8F0;
+  --bg: #F4F7F7;
+  --white: #FFFFFF;
+  --red: #9B1C1C;
+  --red-soft: #FDECEC;
+  --amber: #854D0E;
+  --amber-soft: #FEF3C7;
+  --green: #166534;
+  --green-soft: #DCFCE7;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a { color: var(--teal); }
+a:hover { color: var(--teal-dark); }
+
+h1 { font-size: 22px; margin: 0 0 16px; }
+h2 { font-size: 16px; margin: 0 0 12px; }
+
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+/* ---------- Kadi ---------- */
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+/* ---------- Vitufe ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 1px solid #CBD5E1;
+  background: var(--white);
+  color: var(--ink);
+  font: 600 14px Inter, system-ui, sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:hover { border-color: var(--teal); }
+.btn.primary { background: var(--teal); border-color: var(--teal); color: var(--white); }
+.btn.primary:hover { background: var(--teal-dark); }
+.btn[disabled] { background: var(--line); border-color: var(--line); color: #64748B; cursor: not-allowed; }
+
+/* ---------- Chips za hali ---------- */
+.chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.chip.red { background: var(--red-soft); color: var(--red); }
+.chip.amber { background: var(--amber-soft); color: var(--amber); }
+.chip.green { background: var(--green-soft); color: var(--green); }
+.chip.grey { background: #F1F5F9; color: var(--ink-2); }
+.chip.teal { background: var(--teal-soft); color: var(--teal); }
+
+/* ---------- Fomu ---------- */
+label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+input, select, textarea {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #CBD5E1;
+  border-radius: 10px;
+  font: 400 15px Inter, system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--white);
+  width: 100%;
+}
+textarea { padding: 10px 12px; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--teal); outline-offset: 1px; }
+
+/* ---------- Ukurasa wa hali ya mfumo ---------- */
+.center-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.status-card { width: 100%; max-width: 440px; padding: 28px; }
+
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.brand-mark {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--teal); color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 22px;
+}
+.brand-name { font-weight: 700; font-size: 20px; }
+
+.status-list { list-style: none; margin: 0 0 16px; padding: 0; }
+.status-list li {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--line);
+}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="sw">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HugoMed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/hugomed.css">
+</head>
+<body>
+  <main class="center-page">
+    <div class="card status-card">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">H</div>
+        <div>
+          <div class="brand-name">HugoMed</div>
+          <div class="muted small">Mfumo wa usimamizi wa hospitali · HUGO TECH</div>
+        </div>
+      </div>
+
+      <h1>Hali ya mfumo</h1>
+
+      <ul class="status-list">
+        <li>
+          <span>Server</span>
+          <span id="status-server" class="chip grey">Inaangalia...</span>
+        </li>
+        <li>
+          <span>Database</span>
+          <span id="status-db" class="chip grey">Inaangalia...</span>
+        </li>
+        <li>
+          <span>Majedwali</span>
+          <span id="status-tables" class="chip grey">—</span>
+        </li>
+      </ul>
+
+      <p id="status-message" class="muted small"></p>
+      <button type="button" class="btn primary" id="btn-refresh">Angalia tena</button>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    async function checkHealth() {
+      const server = document.getElementById('status-server');
+      const dbChip = document.getElementById('status-db');
+      const tables = document.getElementById('status-tables');
+      const msg = document.getElementById('status-message');
+
+      try {
+        const data = await HugoMed.api('/api/health');
+        HugoMed.setChip(server, 'green', 'Iko hewani');
+        HugoMed.setChip(dbChip, 'green', 'Imeunganishwa');
+        HugoMed.setChip(tables, 'teal', data.tables + ' majedwali');
+        msg.textContent = 'Toleo ' + data.version + ' · ' + new Date(data.time).toLocaleString('sw-TZ');
+      } catch (err) {
+        if (err.status) {
+          HugoMed.setChip(server, 'green', 'Iko hewani');
+          HugoMed.setChip(dbChip, 'red', 'Haijaunganishwa');
+          HugoMed.setChip(tables, 'grey', '—');
+        } else {
+          HugoMed.setChip(server, 'red', 'Haipatikani');
+          HugoMed.setChip(dbChip, 'grey', '—');
+        }
+        msg.textContent = err.message;
+      }
+    }
+
+    document.getElementById('btn-refresh').addEventListener('click', checkHealth);
+    checkHealth();
+  </script>
+</body>
+</html>
