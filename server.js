@@ -43,15 +43,43 @@ app.get('/api/health', async (req, res) => {
       time: result.rows[0].time
     });
   } catch (err) {
-    console.error('Health check imeshindwa:', err.message);
+    console.error('Health check imeshindwa:', err.code || '', err.message);
     res.status(500).json({
       status: 'error',
       app: 'HugoMed',
       database: 'not connected',
-      message: 'Database haipatikani. Angalia DATABASE_URL kwenye Railway.'
+      code: err.code || null,
+      message: explainDbError(err)
     });
   }
 });
+
+// Inaeleza kwa Kiswahili kwa nini database haipatikani
+function explainDbError(err) {
+  const msg = String(err.message || '');
+  if (!process.env.DATABASE_URL) {
+    return 'DATABASE_URL haijawekwa kwenye service ya hugomed. Iweke kwenye Variables, kisha bofya Deploy.';
+  }
+  if (msg.includes('${{')) {
+    return 'DATABASE_URL ina maandishi ${{...}} ambayo Railway haikuyabadilisha. Jina la service ya database si "Postgres". Chagua DATABASE_URL kwa "Add Reference" badala ya kuiandika.';
+  }
+  if (err.code === 'ENOTFOUND' || err.code === 'EAI_AGAIN') {
+    return 'Server haipati anwani ya database (' + err.code + '). Hakikisha database iko kwenye project hiyo hiyo na environment ileile.';
+  }
+  if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
+    return 'Database imekataa au imechelewa kujibu (' + err.code + '). Angalia kama service ya Postgres iko hai (kijani).';
+  }
+  if (err.code === '28P01') {
+    return 'Password ya database si sahihi (28P01). Weka DATABASE_URL upya kwa "Add Reference".';
+  }
+  if (msg.toLowerCase().includes('ssl')) {
+    return 'Tatizo la SSL: ' + msg + '. Kama unatumia DATABASE_PUBLIC_URL, weka DATABASE_SSL=true.';
+  }
+  if (msg.toLowerCase().includes('invalid url') || err.code === 'ERR_INVALID_URL') {
+    return 'DATABASE_URL imeandikwa vibaya. Iweke upya kwa "Add Reference".';
+  }
+  return 'Database haipatikani: ' + (err.code ? err.code + ' - ' : '') + msg;
+}
 
 // -------------------------------------------------------------
 // Sehemu za mfumo zitaongezwa hapa hatua kwa hatua:
