@@ -32,7 +32,20 @@ window.HugoMedPages.home = function (page, user) {
       stat('Zinazotumika sasa', active, '#/tenants');
       stat('Zimesimamishwa', res.items.filter((t) => t.status === 'suspended').length, '#/tenants');
     }).catch((err) => page.appendChild(h('p', { class: 'form-message error' }, err.message)));
-  } else if (user.role === 'hospital_admin') {
+  }
+
+  // Wafanyakazi wa hospitali: hali ya foleni ya leo
+  if (user.role !== 'super_admin') {
+    HugoMed.api('/api/visits').then((res) => {
+      const c = res.counts || {};
+      const open = ['triage', 'doctor', 'lab', 'results', 'billing', 'pharmacy'].reduce((a, k) => a + (c[k] || 0), 0);
+      stat('Wagonjwa ndani sasa', open, '#/queue');
+      stat('Wanasubiri triage', c.triage || 0, '#/queue');
+      stat('Wanasubiri daktari', c.doctor || 0, '#/queue');
+    }).catch(() => {});
+  }
+
+  if (user.role === 'hospital_admin') {
     HugoMed.api('/api/users').then((res) => {
       stat('Watumiaji', res.items.length, '#/users');
       stat('Walio hai', res.items.filter((u) => u.is_active).length, '#/users');
@@ -46,7 +59,7 @@ window.HugoMedPages.home = function (page, user) {
     h('ol', { class: 'steps' },
       h('li', { class: 'done' }, 'Msingi: server na database'),
       h('li', { class: 'done' }, 'Login, roles, Audit Trail, Super Admin'),
-      h('li', {}, 'Mapokezi na Triage'),
+      h('li', { class: 'done' }, 'Mapokezi na Triage'),
       h('li', {}, 'Foleni na skrini ya daktari'),
       h('li', {}, 'Maabara'),
       h('li', {}, 'Pharmacy na stock'),

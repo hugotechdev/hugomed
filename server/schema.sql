@@ -375,3 +375,11 @@ CREATE INDEX IF NOT EXISTS idx_payments_invoice      ON payments (invoice_id);
 CREATE INDEX IF NOT EXISTS idx_claims_tenant_status  ON claims (tenant_id, status);
 CREATE INDEX IF NOT EXISTS idx_claim_findings_claim  ON claim_findings (claim_id);
 CREATE INDEX IF NOT EXISTS idx_audit_tenant_at       ON audit_log (tenant_id, at);
+
+-- =============================================================
+-- Hatua 3: nyongeza (salama kuendesha mara nyingi)
+-- =============================================================
+ALTER TABLE vitals   ADD COLUMN IF NOT EXISTS complaint TEXT;
+ALTER TABLE visits   ADD COLUMN IF NOT EXISTS cancel_reason TEXT;
+ALTER TABLE patients ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS idx_visits_tenant_arrived ON visits (tenant_id, arrived_at);

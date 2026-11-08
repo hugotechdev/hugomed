@@ -229,3 +229,74 @@ table.data tr.inactive td { color: #94A3B8; }
   #nav-links .nav.disabled, #nav-links .nav-group { display: none; }
   .page, .topbar { padding-left: 16px; padding-right: 16px; }
 }
+
+/* =============================================================
+   Hatua 3: Mapokezi, Triage, Foleni
+   ============================================================= */
+
+.search-bar { display: flex; gap: 10px; padding: 14px; }
+.search-bar input { flex: 1 1 auto; }
+
+.two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 16px; align-items: start; }
+.split { display: grid; grid-template-columns: minmax(240px, 320px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+
+.patient-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.patient-banner.flat { padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+.avatar {
+  width: 46px; height: 46px; border-radius: 50%; background: var(--teal-soft); color: var(--teal);
+  display: flex; align-items: center; justify-content: center; font-weight: 700; flex: 0 0 auto;
+}
+.banner-name { font-size: 18px; font-weight: 700; }
+
+.payer-row {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid #EEF2F6;
+}
+.payer-row > div:first-child { flex: 1 1 200px; }
+details { margin-top: 12px; }
+summary { cursor: pointer; color: var(--teal); font-weight: 600; font-size: 14px; padding: 6px 0; }
+
+.token-box { text-align: center; padding: 16px; border: 1px dashed #94A3B8; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.token { font-size: 48px; font-weight: 700; color: var(--teal); line-height: 1.1; }
+
+.dup-box { border: 1px solid #FCD34D; background: #FFFBEB; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+
+.queue-list { display: flex; flex-direction: column; gap: 8px; }
+.queue-list h2 { margin-bottom: 4px; }
+.queue-item {
+  text-align: left; width: 100%; background: var(--white); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; cursor: pointer; font: inherit; color: inherit; display: flex; flex-direction: column; gap: 2px;
+}
+.queue-item:hover { border-color: var(--teal); }
+.queue-item.on { border-color: var(--teal); background: #F0F9F8; }
+.queue-top { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.queue-top strong { margin-right: auto; }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; min-height: 0; }
+.vitals-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+label.check { flex-direction: row; align-items: center; gap: 10px; font-weight: 500; margin-bottom: 14px; }
+label.check input { width: 20px; min-height: 20px; }
+
+.stage-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.stage-tab {
+  min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--white);
+  font: 600 13px Inter, system-ui, sans-serif; color: var(--ink-2); cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+}
+.stage-tab .count { background: #F1F5F9; border-radius: 999px; padding: 1px 8px; font-size: 12px; }
+.stage-tab.on { background: var(--teal); border-color: var(--teal); color: var(--white); }
+.stage-tab.on .count { background: rgba(255, 255, 255, 0.2); }
+
+/* ---------- Kuchapisha token ---------- */
+#print-slip { display: none; }
+@media print {
+  body * { visibility: hidden; }
+  #print-slip, #print-slip * { visibility: visible; }
+  #print-slip {
+    display: block; position: absolute; left: 0; top: 0; width: 72mm;
+    font-family: Inter, system-ui, sans-serif; text-align: center; font-size: 12pt; line-height: 1.4;
+  }
+  .slip-hosp { font-weight: 700; font-size: 13pt; }
+  .slip-token { font-size: 36pt; font-weight: 700; margin: 6px 0; }
+  .slip-note { margin-top: 6px; font-size: 10pt; }
+}

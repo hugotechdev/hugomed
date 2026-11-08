@@ -40,7 +40,7 @@ app.get('/api/health', async (req, res) => {
     res.json({
       status: 'ok',
       app: 'HugoMed',
-      version: '0.2.0',
+      version: '0.3.0',
       database: 'connected',
       tables: tables.rows[0].count,
       time: result.rows[0].time
@@ -91,7 +91,10 @@ app.use('/api/auth', require('./server/auth'));          // Hatua 2: login
 app.use('/api/tenants', require('./server/tenants'));    // Hatua 2: hospitali (Super Admin)
 app.use('/api/users', require('./server/users'));        // Hatua 2: watumiaji
 app.use('/api/audit', require('./server/audit').router); // Hatua 2: Audit Trail
-// Hatua 3: app.use('/api/patients', require('./server/patients'));
+app.use('/api/payers', require('./server/payers'));      // Hatua 3: bima na kampuni
+app.use('/api/patients', require('./server/patients'));  // Hatua 3: wagonjwa (Mapokezi)
+app.use('/api/visits', require('./server/visits').router); // Hatua 3: ziara, token, triage
+// Hatua 4: daktari (OPD)
 
 // API ambayo haipo
 app.use('/api', (req, res) => {

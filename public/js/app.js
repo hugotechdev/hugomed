@@ -28,6 +28,74 @@ const HugoMed = {
     hospital: 'Hospitali'
   },
 
+  // Idara za kuchagua (zitawekwa kwenye Settings baadaye)
+  DEPARTMENTS: ['OPD', 'Watoto', 'RCH', 'Dharura', 'Meno', 'Macho'],
+
+  // Hatua za safari ya mgonjwa
+  STAGES: {
+    reception: ['grey', 'Mapokezi'],
+    triage: ['amber', 'Triage'],
+    doctor: ['teal', 'Kwa daktari'],
+    lab: ['amber', 'Maabara'],
+    results: ['teal', 'Matokeo kwa daktari'],
+    billing: ['amber', 'Malipo'],
+    pharmacy: ['teal', 'Pharmacy'],
+    completed: ['green', 'Imekamilika'],
+    cancelled: ['grey', 'Imesitishwa']
+  },
+
+  PRIORITIES: {
+    normal: ['grey', 'Kawaida'],
+    urgent: ['amber', 'Haraka'],
+    emergency: ['red', 'Dharura']
+  },
+
+  PAYER_TYPES: {
+    cash: 'Cash',
+    nhif: 'NHIF',
+    insurance: 'Bima binafsi',
+    company: 'Kampuni (credit)'
+  },
+
+  // Jina kamili la mgonjwa
+  patientName(p) {
+    return [p.first_name, p.middle_name, p.last_name].filter(Boolean).join(' ');
+  },
+
+  // Umri kwa miaka (au miezi kwa mtoto mdogo)
+  age(dob) {
+    if (!dob) return '';
+    const d = new Date(dob);
+    const now = new Date();
+    let years = now.getFullYear() - d.getFullYear();
+    if (now < new Date(now.getFullYear(), d.getMonth(), d.getDate())) years -= 1;
+    if (years >= 2) return 'miaka ' + years;
+    const months = (now.getFullYear() - d.getFullYear()) * 12 + now.getMonth() - d.getMonth() - (now.getDate() < d.getDate() ? 1 : 0);
+    return 'miezi ' + Math.max(months, 0);
+  },
+
+  sexLabel(s) {
+    return s === 'F' ? 'Mwanamke' : s === 'M' ? 'Mwanaume' : '';
+  },
+
+  // Chip ya hatua au kipaumbele
+  stageChip(stage) {
+    const s = HugoMed.STAGES[stage] || ['grey', stage];
+    return HugoMed.h('span', { class: 'chip ' + s[0] }, s[1]);
+  },
+  priorityChip(p) {
+    if (!p || p === 'normal') return null;
+    const s = HugoMed.PRIORITIES[p];
+    return HugoMed.h('span', { class: 'chip ' + s[0] }, s[1]);
+  },
+
+  // Muda wa kusubiri: chip nyekundu zaidi ya dakika 30
+  waitChip(minutes) {
+    const m = Number(minutes || 0);
+    const text = m < 60 ? 'dk ' + m : 'saa ' + Math.floor(m / 60) + ' dk ' + (m % 60);
+    return HugoMed.h('span', { class: 'chip ' + (m > 30 ? 'red' : m > 15 ? 'amber' : 'grey') }, text);
+  },
+
   // ---------- Login ----------
   getToken() {
     try { return localStorage.getItem('hugomed_token'); } catch (e) { return null; }
@@ -77,6 +145,7 @@ const HugoMed = {
     if (!res.ok) {
       const err = new Error(data.message || 'Kuna tatizo (' + res.status + ')');
       err.status = res.status;
+      err.data = data;
       throw err;
     }
     return data;

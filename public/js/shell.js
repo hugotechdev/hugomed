@@ -7,8 +7,13 @@
   const h = HugoMed.h;
 
   // Menyu: key = jina la ukurasa, roles = wanaoruhusiwa ('all' = wote)
+  const STAFF = ['hospital_admin', 'receptionist', 'nurse', 'doctor', 'lab_technician', 'pharmacist', 'cashier', 'claims_officer'];
   const NAV = [
     { key: 'home', label: 'Mwanzo', roles: 'all' },
+    { key: 'queue', label: 'Foleni ya leo', roles: STAFF },
+    { key: 'reception', label: 'Mapokezi', roles: ['hospital_admin', 'receptionist', 'nurse'] },
+    { key: 'triage', label: 'Triage', roles: ['hospital_admin', 'nurse', 'doctor'] },
+    { key: 'payers', label: 'Bima na kampuni', roles: ['hospital_admin'] },
     { key: 'tenants', label: 'Hospitali', roles: ['super_admin'] },
     { key: 'users', label: 'Watumiaji', roles: ['hospital_admin', 'super_admin'] },
     { key: 'audit', label: 'Audit Trail', roles: ['hospital_admin', 'super_admin'] },
@@ -16,7 +21,7 @@
   ];
 
   // Moduli zinazokuja (zinaonekana lakini hazijafunguliwa)
-  const COMING = ['Mapokezi', 'Triage', 'Daktari (OPD)', 'Maabara', 'Malipo', 'Pharmacy', 'Madai ya bima'];
+  const COMING = ['Daktari (OPD)', 'Maabara', 'Malipo', 'Pharmacy', 'Madai ya bima', 'Ripoti'];
 
   function allowed(item, user) {
     return item.roles === 'all' || item.roles.includes(user.role);
