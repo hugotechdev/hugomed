@@ -11,6 +11,9 @@ const db = require('./server/db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Railway iko nyuma ya proxy: hii inahakikisha IP halisi ya mtumiaji inarekodiwa
+app.set('trust proxy', 1);
+
 // Kusoma JSON inayotumwa na browser
 app.use(express.json({ limit: '2mb' }));
 
@@ -37,7 +40,7 @@ app.get('/api/health', async (req, res) => {
     res.json({
       status: 'ok',
       app: 'HugoMed',
-      version: '0.1.0',
+      version: '0.2.0',
       database: 'connected',
       tables: tables.rows[0].count,
       time: result.rows[0].time
@@ -82,11 +85,13 @@ function explainDbError(err) {
 }
 
 // -------------------------------------------------------------
-// Sehemu za mfumo zitaongezwa hapa hatua kwa hatua:
-// Hatua 2: app.use('/api/auth', require('./server/auth'));
-// Hatua 2: app.use('/api/tenants', require('./server/tenants'));
-// Hatua 3: app.use('/api/patients', require('./server/patients'));
+// Sehemu za mfumo
 // -------------------------------------------------------------
+app.use('/api/auth', require('./server/auth'));          // Hatua 2: login
+app.use('/api/tenants', require('./server/tenants'));    // Hatua 2: hospitali (Super Admin)
+app.use('/api/users', require('./server/users'));        // Hatua 2: watumiaji
+app.use('/api/audit', require('./server/audit').router); // Hatua 2: Audit Trail
+// Hatua 3: app.use('/api/patients', require('./server/patients'));
 
 // API ambayo haipo
 app.use('/api', (req, res) => {

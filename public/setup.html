@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="sw">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HugoMed · Setup ya kwanza</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/hugomed.css">
+</head>
+<body>
+  <main class="center-page">
+    <div class="card status-card">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">H</div>
+        <div>
+          <div class="brand-name">HugoMed</div>
+          <div class="muted small">Setup ya kwanza · mara moja tu</div>
+        </div>
+      </div>
+
+      <h1>Unda Super Admin wa HUGO TECH</h1>
+      <p class="muted small">Akaunti hii inasajili hospitali na kusimamia mfumo mzima. Setup key ni ile uliyoweka kwenye Railway (SETUP_KEY).</p>
+
+      <form id="setup-form" class="stack" novalidate>
+        <label>Setup key
+          <input type="password" name="setup_key" required>
+        </label>
+        <label>Jina kamili
+          <input name="full_name" required>
+        </label>
+        <label>Barua pepe
+          <input type="email" name="email" autocomplete="username" required>
+        </label>
+        <label>Password (herufi 8+, iwe na herufi na namba)
+          <input type="password" name="password" autocomplete="new-password" required>
+        </label>
+        <p id="setup-message" class="form-message" role="alert"></p>
+        <button type="submit" class="btn primary block">Unda Super Admin</button>
+      </form>
+      <p class="muted small"><a href="/">Rudi kwenye login</a></p>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    const form = document.getElementById('setup-form');
+    const msg = document.getElementById('setup-message');
+
+    HugoMed.api('/api/auth/setup-status').then((s) => {
+      if (!s.needs_setup) {
+        HugoMed.showMessage(msg, 'Super Admin tayari yupo. Tumia ukurasa wa login.', 'ok');
+        form.querySelector('button').disabled = true;
+      } else if (!s.setup_key_configured) {
+        HugoMed.showMessage(msg, 'Kwanza weka SETUP_KEY kwenye Railway > Variables, kisha Deploy.', 'error');
+      }
+    }).catch((err) => HugoMed.showMessage(msg, err.message, 'error'));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button');
+      btn.disabled = true;
+      HugoMed.showMessage(msg, '');
+      try {
+        await HugoMed.api('/api/auth/setup', { method: 'POST', body: HugoMed.formData(form), noRedirect: true });
+        HugoMed.showMessage(msg, 'Super Admin ameundwa. Unapelekwa kwenye login...', 'ok');
+        setTimeout(() => { window.location.href = '/'; }, 1500);
+      } catch (err) {
+        HugoMed.showMessage(msg, err.message, 'error');
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>HugoMed</title>
+  <title>HugoMed · Ingia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/hugomed.css">
@@ -19,57 +19,53 @@
         </div>
       </div>
 
-      <h1>Hali ya mfumo</h1>
+      <h1>Ingia kwenye mfumo</h1>
 
-      <ul class="status-list">
-        <li>
-          <span>Server</span>
-          <span id="status-server" class="chip grey">Inaangalia...</span>
-        </li>
-        <li>
-          <span>Database</span>
-          <span id="status-db" class="chip grey">Inaangalia...</span>
-        </li>
-        <li>
-          <span>Majedwali</span>
-          <span id="status-tables" class="chip grey">—</span>
-        </li>
-      </ul>
+      <form id="login-form" class="stack" novalidate>
+        <label>Barua pepe
+          <input type="email" name="email" autocomplete="username" required>
+        </label>
+        <label>Password
+          <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+        <p id="login-message" class="form-message" role="alert"></p>
+        <button type="submit" class="btn primary block">Ingia</button>
+      </form>
 
-      <p id="status-message" class="muted small"></p>
-      <button type="button" class="btn primary" id="btn-refresh">Angalia tena</button>
+      <p id="setup-link" class="muted small" hidden>
+        Mfumo bado haujaandaliwa. <a href="setup.html">Unda Super Admin wa kwanza</a>
+      </p>
+      <p class="muted small"><a href="status.html">Hali ya mfumo</a></p>
     </div>
   </main>
 
   <script src="js/app.js"></script>
   <script>
-    async function checkHealth() {
-      const server = document.getElementById('status-server');
-      const dbChip = document.getElementById('status-db');
-      const tables = document.getElementById('status-tables');
-      const msg = document.getElementById('status-message');
+    // Kama tayari ameingia, mpeleke moja kwa moja kwenye mfumo
+    if (HugoMed.getToken()) window.location.href = 'app.html';
 
+    HugoMed.api('/api/auth/setup-status')
+      .then((s) => { if (s.needs_setup) document.getElementById('setup-link').hidden = false; })
+      .catch(() => {});
+
+    const form = document.getElementById('login-form');
+    const msg = document.getElementById('login-message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = HugoMed.formData(form);
+      const btn = form.querySelector('button');
+      btn.disabled = true;
+      HugoMed.showMessage(msg, '');
       try {
-        const data = await HugoMed.api('/api/health');
-        HugoMed.setChip(server, 'green', 'Iko hewani');
-        HugoMed.setChip(dbChip, 'green', 'Imeunganishwa');
-        HugoMed.setChip(tables, 'teal', data.tables + ' majedwali');
-        msg.textContent = 'Toleo ' + data.version + ' · ' + new Date(data.time).toLocaleString('sw-TZ');
+        const res = await HugoMed.api('/api/auth/login', { method: 'POST', body: data, noRedirect: true });
+        HugoMed.saveLogin(res.token, res.user);
+        window.location.href = 'app.html';
       } catch (err) {
-        if (err.status) {
-          HugoMed.setChip(server, 'green', 'Iko hewani');
-          HugoMed.setChip(dbChip, 'red', 'Haijaunganishwa');
-          HugoMed.setChip(tables, 'grey', '—');
-        } else {
-          HugoMed.setChip(server, 'red', 'Haipatikani');
-          HugoMed.setChip(dbChip, 'grey', '—');
-        }
-        msg.textContent = err.message;
+        HugoMed.showMessage(msg, err.message, 'error');
+        btn.disabled = false;
       }
-    }
-
-    document.getElementById('btn-refresh').addEventListener('click', checkHealth);
-    checkHealth();
+    });
   </script>
 </body>
 </html>
