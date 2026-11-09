@@ -36,6 +36,38 @@ window.HugoMedPages.account = function (page, me) {
   );
   page.appendChild(form);
 
+  // Likizo zangu (wafanyakazi wa hospitali)
+  if (me.tenant_id) {
+    const lmsg = h('p', { class: 'form-message', role: 'alert' });
+    const lform = h('form', { class: 'card', style: 'margin-top: 20px', novalidate: true },
+      h('h2', {}, 'Omba likizo'),
+      h('div', { class: 'form-grid' },
+        h('label', {}, 'Aina', h('select', { name: 'leave_type' }, ['Likizo ya mwaka', 'Ugonjwa', 'Uzazi', 'Dharura', 'Masomo', 'Nyingine'].map((x) => h('option', { value: x }, x)))),
+        h('label', {}, 'Kuanzia', h('input', { type: 'date', name: 'start_date' })),
+        h('label', {}, 'Hadi', h('input', { type: 'date', name: 'end_date' })),
+        h('label', {}, 'Sababu', h('input', { name: 'reason' }))
+      ),
+      lmsg,
+      h('div', { class: 'row-actions' }, h('button', { type: 'submit', class: 'btn' }, 'Tuma ombi'))
+    );
+    const list = h('div', { class: 'stack', style: 'margin-top: 10px' });
+    lform.appendChild(list);
+    const ST = { pending: ['amber', 'Inasubiri'], approved: ['green', 'Imeidhinishwa'], rejected: ['grey', 'Imekataliwa'] };
+    const loadLeave = () => HugoMed.api('/api/hr/leave').then((r) => {
+      list.textContent = '';
+      r.items.slice(0, 5).forEach((l) => list.appendChild(h('div', { class: 'payer-row' },
+        h('div', {}, l.leave_type + ' · ' + HugoMed.date(l.start_date) + ' – ' + HugoMed.date(l.end_date) + ' (siku ' + l.days + ')'),
+        h('span', { class: 'chip ' + ST[l.status][0] }, ST[l.status][1]))));
+    }).catch(() => {});
+    lform.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try { const r = await HugoMed.api('/api/hr/leave', { method: 'POST', body: HugoMed.formData(lform) }); HugoMed.showMessage(lmsg, r.message, 'ok'); loadLeave(); }
+      catch (err) { HugoMed.showMessage(lmsg, err.message, 'error'); }
+    });
+    page.appendChild(lform);
+    loadLeave();
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = HugoMed.formData(form);

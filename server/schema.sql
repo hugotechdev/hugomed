@@ -383,3 +383,141 @@ ALTER TABLE vitals   ADD COLUMN IF NOT EXISTS complaint TEXT;
 ALTER TABLE visits   ADD COLUMN IF NOT EXISTS cancel_reason TEXT;
 ALTER TABLE patients ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
 CREATE INDEX IF NOT EXISTS idx_visits_tenant_arrived ON visits (tenant_id, arrived_at);
+
+-- =============================================================
+-- Hatua 5+: mfumo kamili (salama kuendesha mara nyingi)
+-- =============================================================
+
+-- Hatua mpya ya ziara: mgonjwa amelazwa (IPD)
+ALTER TABLE visits DROP CONSTRAINT IF EXISTS visits_stage_check;
+ALTER TABLE visits ADD CONSTRAINT visits_stage_check
+  CHECK (stage IN ('reception','triage','doctor','lab','results','admitted','billing','pharmacy','completed','cancelled'));
+
+-- Maabara / radiology: nani amechukua sampuli
+ALTER TABLE lab_results ADD COLUMN IF NOT EXISTS sample_taken_by INTEGER REFERENCES users(id);
+CREATE INDEX IF NOT EXISTS idx_lab_results_order ON lab_results (order_id);
+
+-- Huduma: kiwango cha kuagiza upya stock
+ALTER TABLE services ADD COLUMN IF NOT EXISTS reorder_level NUMERIC(12,2) NOT NULL DEFAULT 0;
+
+-- Stock: kila badiliko linarekodiwa
+ALTER TABLE stock_items ADD COLUMN IF NOT EXISTS supplier TEXT;
+CREATE TABLE IF NOT EXISTS stock_movements (
+  id            SERIAL PRIMARY KEY,
+  tenant_id     INTEGER NOT NULL REFERENCES tenants(id),
+  stock_item_id INTEGER NOT NULL REFERENCES stock_items(id),
+  change        NUMERIC(12,2) NOT NULL,
+  reason        TEXT NOT NULL CHECK (reason IN ('received','dispensed','adjusted','expired','returned')),
+  note          TEXT,
+  order_id      INTEGER REFERENCES orders(id),
+  user_id       INTEGER REFERENCES users(id),
+  at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_stock_movements_item ON stock_movements (stock_item_id);
+
+-- Bili: msamaha na hali ya kufungwa
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS waiver_reason TEXT;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS waiver_by INTEGER REFERENCES users(id);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS finalized_at TIMESTAMPTZ;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS payer_amount NUMERIC(14,2) NOT NULL DEFAULT 0;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS patient_amount NUMERIC(14,2) NOT NULL DEFAULT 0;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS receipt_no TEXT;
+ALTER TABLE cashier_shifts ADD COLUMN IF NOT EXISTS expected_other NUMERIC(14,2);
+
+-- Madai: muda wa kukaguliwa
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS checked_at TIMESTAMPTZ;
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS visit_id INTEGER REFERENCES visits(id);
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- IPD: wodi, vitanda, kulazwa, nursing notes
+CREATE TABLE IF NOT EXISTS wards (
+  id          SERIAL PRIMARY KEY,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants(id),
+  name        TEXT NOT NULL,
+  bed_service_id INTEGER REFERENCES services(id),
+  is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS beds (
+  id          SERIAL PRIMARY KEY,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants(id),
+  ward_id     INTEGER NOT NULL REFERENCES wards(id),
+  label       TEXT NOT NULL,
+  is_active   BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE TABLE IF NOT EXISTS admissions (
+  id             SERIAL PRIMARY KEY,
+  tenant_id      INTEGER NOT NULL REFERENCES tenants(id),
+  visit_id       INTEGER NOT NULL REFERENCES visits(id),
+  patient_id     INTEGER NOT NULL REFERENCES patients(id),
+  bed_id         INTEGER REFERENCES beds(id),
+  reason         TEXT,
+  admitted_by    INTEGER REFERENCES users(id),
+  admitted_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  discharged_at  TIMESTAMPTZ,
+  discharged_by  INTEGER REFERENCES users(id),
+  discharge_summary TEXT,
+  status         TEXT NOT NULL DEFAULT 'admitted' CHECK (status IN ('admitted','discharged'))
+);
+CREATE INDEX IF NOT EXISTS idx_admissions_tenant_status ON admissions (tenant_id, status);
+CREATE TABLE IF NOT EXISTS nursing_notes (
+  id            SERIAL PRIMARY KEY,
+  tenant_id     INTEGER NOT NULL REFERENCES tenants(id),
+  admission_id  INTEGER NOT NULL REFERENCES admissions(id),
+  note          TEXT NOT NULL,
+  user_id       INTEGER REFERENCES users(id),
+  at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Fedha: matumizi
+CREATE TABLE IF NOT EXISTS expenses (
+  id           SERIAL PRIMARY KEY,
+  tenant_id    INTEGER NOT NULL REFERENCES tenants(id),
+  expense_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  category     TEXT NOT NULL,
+  description  TEXT NOT NULL,
+  amount       NUMERIC(14,2) NOT NULL CHECK (amount > 0),
+  paid_to      TEXT,
+  method       TEXT,
+  reference    TEXT,
+  status       TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
+  created_by   INTEGER REFERENCES users(id),
+  approved_by  INTEGER REFERENCES users(id),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- HR: mishahara, makato, likizo, zamu
+ALTER TABLE users ADD COLUMN IF NOT EXISTS basic_salary NUMERIC(14,2);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS allowances NUMERIC(14,2);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_account TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS department TEXT;
+
+CREATE TABLE IF NOT EXISTS payroll_deductions (
+  id         SERIAL PRIMARY KEY,
+  tenant_id  INTEGER NOT NULL REFERENCES tenants(id),
+  name       TEXT NOT NULL,
+  percent    NUMERIC(6,3) NOT NULL DEFAULT 0,
+  fixed_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+  is_active  BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE TABLE IF NOT EXISTS leave_requests (
+  id          SERIAL PRIMARY KEY,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants(id),
+  user_id     INTEGER NOT NULL REFERENCES users(id),
+  leave_type  TEXT NOT NULL,
+  start_date  DATE NOT NULL,
+  end_date    DATE NOT NULL,
+  reason      TEXT,
+  status      TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
+  decided_by  INTEGER REFERENCES users(id),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS roster (
+  id          SERIAL PRIMARY KEY,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants(id),
+  user_id     INTEGER NOT NULL REFERENCES users(id),
+  shift_date  DATE NOT NULL,
+  shift       TEXT NOT NULL CHECK (shift IN ('morning','evening','night','oncall','off')),
+  UNIQUE (user_id, shift_date)
+);

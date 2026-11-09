@@ -40,7 +40,7 @@ app.get('/api/health', async (req, res) => {
     res.json({
       status: 'ok',
       app: 'HugoMed',
-      version: '0.3.0',
+      version: '1.0.0',
       database: 'connected',
       tables: tables.rows[0].count,
       time: result.rows[0].time
@@ -94,7 +94,17 @@ app.use('/api/audit', require('./server/audit').router); // Hatua 2: Audit Trail
 app.use('/api/payers', require('./server/payers'));      // Hatua 3: bima na kampuni
 app.use('/api/patients', require('./server/patients'));  // Hatua 3: wagonjwa (Mapokezi)
 app.use('/api/visits', require('./server/visits').router); // Hatua 3: ziara, token, triage
-// Hatua 4: daktari (OPD)
+app.use('/api/services', require('./server/services'));  // Hatua 4: orodha ya vipimo, dawa, huduma
+app.use('/api/opd', require('./server/opd'));            // Hatua 4: daktari (OPD)
+app.use('/api/lab', require('./server/lab'));            // Maabara na radiology
+app.use('/api/billing', require('./server/billing'));    // Malipo, price lists, zamu za cashier
+app.use('/api/pharmacy', require('./server/pharmacy').pharmacy); // Pharmacy
+app.use('/api/stock', require('./server/pharmacy').stock);       // Stock ya dawa
+app.use('/api/claims', require('./server/claims'));      // Madai ya NHIF, bima, kampuni
+app.use('/api/ipd', require('./server/ipd'));            // Wodi, vitanda, kulaza, discharge
+app.use('/api/reports', require('./server/reports'));    // Dashboard na ripoti
+app.use('/api/finance', require('./server/finance'));    // Fedha: matumizi, wanaodaiwa, zamu
+app.use('/api/hr', require('./server/hr'));              // HR: mishahara, likizo, zamu
 
 // API ambayo haipo
 app.use('/api', (req, res) => {

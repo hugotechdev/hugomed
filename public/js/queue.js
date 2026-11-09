@@ -19,7 +19,7 @@ window.HugoMedPages.queue = function (page, me) {
   const box = h('section', { class: 'card flush' });
   page.appendChild(box);
 
-  const ORDER = ['triage', 'doctor', 'lab', 'results', 'billing', 'pharmacy', 'completed', 'cancelled'];
+  const ORDER = ['triage', 'doctor', 'lab', 'results', 'admitted', 'billing', 'pharmacy', 'completed', 'cancelled'];
 
   function renderTabs(counts) {
     tabs.textContent = '';
@@ -34,6 +34,11 @@ window.HugoMedPages.queue = function (page, me) {
 
   function nextPage(v) {
     if (v.stage === 'triage' && ['nurse', 'doctor', 'hospital_admin'].includes(me.role)) return '#/triage';
+    if (['doctor', 'results'].includes(v.stage) && ['doctor', 'hospital_admin', 'nurse'].includes(me.role)) return '#/doctor?visit=' + v.id;
+    if (v.stage === 'lab' && ['lab_technician', 'hospital_admin', 'doctor'].includes(me.role)) return '#/lab';
+    if (v.stage === 'billing' && ['cashier', 'hospital_admin', 'accountant', 'receptionist'].includes(me.role)) return '#/cashier';
+    if (v.stage === 'pharmacy' && ['pharmacist', 'hospital_admin', 'nurse'].includes(me.role)) return '#/pharmacy';
+    if (v.stage === 'admitted' && ['doctor', 'hospital_admin', 'nurse'].includes(me.role)) return '#/ipd';
     return null;
   }
 

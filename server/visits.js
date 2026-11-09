@@ -18,7 +18,7 @@ router.use(requireAuth, requireRole('hospital_admin', 'receptionist', 'nurse', '
 
 const TZ = 'Africa/Dar_es_Salaam';
 const TODAY = `(v.arrived_at AT TIME ZONE '${TZ}')::date = (NOW() AT TIME ZONE '${TZ}')::date`;
-const STAGES = ['reception', 'triage', 'doctor', 'lab', 'results', 'billing', 'pharmacy', 'completed', 'cancelled'];
+const STAGES = ['reception', 'triage', 'doctor', 'lab', 'results', 'admitted', 'billing', 'pharmacy', 'completed', 'cancelled'];
 const PRIORITIES = ['normal', 'urgent', 'emergency'];
 const OPEN = "v.stage NOT IN ('completed', 'cancelled')";
 

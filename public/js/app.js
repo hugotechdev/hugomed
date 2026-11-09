@@ -38,6 +38,7 @@ const HugoMed = {
     doctor: ['teal', 'Kwa daktari'],
     lab: ['amber', 'Maabara'],
     results: ['teal', 'Matokeo kwa daktari'],
+    admitted: ['teal', 'Amelazwa'],
     billing: ['amber', 'Malipo'],
     pharmacy: ['teal', 'Pharmacy'],
     completed: ['green', 'Imekamilika'],

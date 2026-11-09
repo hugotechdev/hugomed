@@ -55,18 +55,19 @@ window.HugoMedPages.home = function (page, user) {
   }
 
   page.appendChild(h('section', { class: 'card', style: 'margin-top: 20px' },
-    h('h2', {}, 'Hatua za ujenzi wa HugoMed'),
+    h('h2', {}, 'Moduli za HugoMed 1.0'),
     h('ol', { class: 'steps' },
       h('li', { class: 'done' }, 'Msingi: server na database'),
       h('li', { class: 'done' }, 'Login, roles, Audit Trail, Super Admin'),
       h('li', { class: 'done' }, 'Mapokezi na Triage'),
-      h('li', {}, 'Foleni na skrini ya daktari'),
-      h('li', {}, 'Maabara'),
-      h('li', {}, 'Pharmacy na stock'),
-      h('li', {}, 'Billing kwa walipaji wote'),
-      h('li', {}, 'NHIF na bima: uhakiki na madai'),
-      h('li', {}, 'Claims Pre-Audit'),
-      h('li', {}, 'Dashboard na ripoti')
+      h('li', { class: 'done' }, 'Foleni na skrini ya daktari'),
+      h('li', { class: 'done' }, 'Maabara'),
+      h('li', { class: 'done' }, 'Pharmacy na stock'),
+      h('li', { class: 'done' }, 'Billing kwa walipaji wote'),
+      h('li', { class: 'done' }, 'NHIF na bima: uhakiki na madai'),
+      h('li', { class: 'done' }, 'Claims Pre-Audit'),
+      h('li', { class: 'done' }, 'Dashboard na ripoti'),
+      h('li', { class: 'done' }, 'IPD, Fedha na HR')
     )
   ));
 };

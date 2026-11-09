@@ -1,6 +1,6 @@
 {
   "name": "hugomed",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "HugoMed - Mfumo wa usimamizi wa hospitali (HUGO TECH)",
   "main": "server.js",
   "private": true,

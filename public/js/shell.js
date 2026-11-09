@@ -6,22 +6,45 @@
 (function () {
   const h = HugoMed.h;
 
-  // Menyu: key = jina la ukurasa, roles = wanaoruhusiwa ('all' = wote)
-  const STAFF = ['hospital_admin', 'receptionist', 'nurse', 'doctor', 'lab_technician', 'pharmacist', 'cashier', 'claims_officer'];
-  const NAV = [
-    { key: 'home', label: 'Mwanzo', roles: 'all' },
-    { key: 'queue', label: 'Foleni ya leo', roles: STAFF },
-    { key: 'reception', label: 'Mapokezi', roles: ['hospital_admin', 'receptionist', 'nurse'] },
-    { key: 'triage', label: 'Triage', roles: ['hospital_admin', 'nurse', 'doctor'] },
-    { key: 'payers', label: 'Bima na kampuni', roles: ['hospital_admin'] },
-    { key: 'tenants', label: 'Hospitali', roles: ['super_admin'] },
-    { key: 'users', label: 'Watumiaji', roles: ['hospital_admin', 'super_admin'] },
-    { key: 'audit', label: 'Audit Trail', roles: ['hospital_admin', 'super_admin'] },
-    { key: 'account', label: 'Akaunti yangu', roles: 'all' }
-  ];
+  const ADMIN = 'hospital_admin';
+  const STAFF = [ADMIN, 'receptionist', 'nurse', 'doctor', 'lab_technician', 'pharmacist', 'cashier', 'claims_officer', 'accountant', 'hr_officer'];
 
-  // Moduli zinazokuja (zinaonekana lakini hazijafunguliwa)
-  const COMING = ['Daktari (OPD)', 'Maabara', 'Malipo', 'Pharmacy', 'Madai ya bima', 'Ripoti'];
+  // Menyu kwa makundi: key = jina la ukurasa, roles = wanaoruhusiwa ('all' = wote)
+  const NAV = [
+    { group: null, items: [
+      { key: 'home', label: 'Mwanzo', roles: 'all' },
+      { key: 'dashboard', label: 'Dashboard', roles: [ADMIN, 'accountant', 'claims_officer'] }
+    ] },
+    { group: 'Safari ya mgonjwa', items: [
+      { key: 'queue', label: 'Foleni ya leo', roles: STAFF },
+      { key: 'reception', label: 'Mapokezi', roles: [ADMIN, 'receptionist', 'nurse'] },
+      { key: 'triage', label: 'Triage', roles: [ADMIN, 'nurse', 'doctor'] },
+      { key: 'doctor', label: 'Daktari (OPD)', roles: [ADMIN, 'doctor', 'nurse'] },
+      { key: 'lab', label: 'Maabara na Radiology', roles: [ADMIN, 'lab_technician', 'doctor'] },
+      { key: 'ipd', label: 'IPD (wodi)', roles: [ADMIN, 'doctor', 'nurse'] },
+      { key: 'cashier', label: 'Malipo', roles: [ADMIN, 'cashier', 'accountant', 'receptionist'] },
+      { key: 'pharmacy', label: 'Pharmacy', roles: [ADMIN, 'pharmacist', 'nurse'] }
+    ] },
+    { group: 'Fedha na bima', items: [
+      { key: 'claims', label: 'Madai ya bima', roles: [ADMIN, 'claims_officer', 'accountant'] },
+      { key: 'finance', label: 'Fedha', roles: [ADMIN, 'accountant'] },
+      { key: 'prices', label: 'Price lists', roles: [ADMIN, 'accountant', 'cashier'] },
+      { key: 'payers', label: 'Bima na kampuni', roles: [ADMIN] }
+    ] },
+    { group: 'Uendeshaji', items: [
+      { key: 'stock', label: 'Stock ya dawa', roles: [ADMIN, 'pharmacist', 'accountant'] },
+      { key: 'reports', label: 'Ripoti', roles: [ADMIN, 'accountant', 'claims_officer', 'doctor'] },
+      { key: 'hr', label: 'HR', roles: [ADMIN, 'hr_officer', 'accountant'] }
+    ] },
+    { group: 'Mipangilio', items: [
+      { key: 'tenants', label: 'Hospitali', roles: ['super_admin'] },
+      { key: 'users', label: 'Watumiaji', roles: [ADMIN, 'super_admin'] },
+      { key: 'services', label: 'Vipimo na dawa', roles: [ADMIN] },
+      { key: 'audit', label: 'Audit Trail', roles: [ADMIN, 'super_admin'] },
+      { key: 'account', label: 'Akaunti yangu', roles: 'all' }
+    ] }
+  ];
+  const ALL = NAV.flatMap((g) => g.items);
 
   function allowed(item, user) {
     return item.roles === 'all' || item.roles.includes(user.role);
@@ -36,18 +59,17 @@
     const box = document.getElementById('nav-links');
     box.textContent = '';
     const key = currentKey();
-    NAV.filter((n) => allowed(n, user)).forEach((n) => {
-      box.appendChild(h('a', { class: 'nav' + (n.key === key ? ' on' : ''), href: '#/' + n.key }, n.label));
+    NAV.forEach((g) => {
+      const items = g.items.filter((n) => allowed(n, user));
+      if (!items.length) return;
+      if (g.group) box.appendChild(h('div', { class: 'nav-group' }, g.group));
+      items.forEach((n) => box.appendChild(h('a', { class: 'nav' + (n.key === key ? ' on' : ''), href: '#/' + n.key }, n.label)));
     });
-    if (user.role !== 'super_admin') {
-      box.appendChild(h('div', { class: 'nav-group' }, 'Inakuja hivi karibuni'));
-      COMING.forEach((c) => box.appendChild(h('span', { class: 'nav disabled', 'aria-disabled': 'true' }, c)));
-    }
   }
 
   function renderPage(user) {
     const key = currentKey();
-    const item = NAV.find((n) => n.key === key);
+    const item = ALL.find((n) => n.key === key);
     const page = document.getElementById('page');
     page.textContent = '';
 
@@ -56,6 +78,7 @@
       return;
     }
     document.title = 'HugoMed · ' + item.label;
+    window.scrollTo(0, 0);
     window.HugoMedPages[key](page, user);
   }
 
